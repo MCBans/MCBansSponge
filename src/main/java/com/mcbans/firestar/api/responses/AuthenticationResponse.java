@@ -1,8 +1,9 @@
 package com.mcbans.firestar.api.responses;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class AuthenticationResponse {
+public class AuthenticationResponse extends Response{
 	public String banStatus;
 	public String ban;
 	public int banId;
@@ -11,7 +12,7 @@ public class AuthenticationResponse {
 	public double playerRep;
 	public int disputeCount;
 	public String connectMessage;
-	public ArrayList<String> bans;
+	public ArrayList<HashMap<String, String>> bans;
 	public ArrayList<String> nameChanges;
 	public ArrayList<String> dnsbl;
 	public ArrayList<String> altList;
@@ -67,10 +68,10 @@ public class AuthenticationResponse {
 	public void setConnectMessage(String connectMessage) {
 		this.connectMessage = connectMessage;
 	}
-	public ArrayList<String> getBans() {
+	public ArrayList<HashMap<String, String>> getBans() {
 		return bans;
 	}
-	public void setBans(ArrayList<String> bans) {
+	public void setBans(ArrayList<HashMap<String, String>> bans) {
 		this.bans = bans;
 	}
 	public ArrayList<String> getNameChanges() {

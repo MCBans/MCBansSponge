@@ -1,47 +1,133 @@
 package com.mcbans.firestar;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.text.format.TextColors;
 
+import com.google.inject.Inject;
 import com.mcbans.firestar.commands.specs.MCBansCommandSpecs;
 import com.mcbans.firestar.eventhandlers.LoginEventHandler;
 
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+
 @Plugin(id = "MCB", name = "MCBans Banning Plugin", version="0.1")
 public class MCBansMod {
-	public static String prefix = "[MCBans]";
-	public static String apiKey = "APIKEY";
+
+	public static final String NAME = "MCBans";
+	public static MCBansMod bridge = null;
+	
+	@Inject
+    @DefaultConfig(sharedRoot = true)
+    private ConfigurationLoader<CommentedConfigurationNode> configManager;
+	
+	@Inject
+    @DefaultConfig(sharedRoot = true)
+    private File defaultConfig;
+	
+	private ConfigurationNode config = null;
+	
+	@Inject
+    private PluginContainer pluginContainer;
+	
+	public File getDefaultConfig() {
+        return this.defaultConfig;
+    }
+    public ConfigurationLoader<CommentedConfigurationNode> getConfigManager() {
+        return this.configManager;
+    }
+    
 	@Listener
     public void preinit(GamePreInitializationEvent event) {
-		System.out.println("MCBANS STARTING! ALPHA TEST BUILD");
-		
+		this.getLogger().info("MCBans picking servers");
+		this.getLogger().info("api.mcbans.com");
     }
     
 	@Listener
     public void init(GameInitializationEvent event) {
-        event.getGame().getEventManager().registerListeners(this, new LoginEventHandler());
+        try {
+        	if (!getDefaultConfig().exists()) {
+				this.config = getConfigManager().load();
+				getDefaultConfig().createNewFile();
+				this.config.getNode("Version").setValue(1);
+				
+				// Server configs
+	            this.config.getNode("server", "apiKey").setValue("<APIKEYHERE>");
+	            this.config.getNode("server", "prefix").setValue("MCBans");
+	            
+	            // Auth configs
+	            this.config.getNode("login", "block-zero-reputation").setValue(true);
+	            this.config.getNode("login", "block-minimum-reputation").setValue(4);
+	            
+	            // Join configs
+	            this.config.getNode("join", "show", "bans").setValue(true);
+	            
+	            
+	            
+	            getConfigManager().save(this.config);
+	            this.getLogger().info("Created default config file, enter your servers api key ( found at http://my.mcbans.com/servers )");
+        	}
+        	this.config = getConfigManager().load();
+		} catch (IOException e) {
+			this.getLogger().error("Issue with the creation of the config file");
+		}
+		Sponge.getGame().getEventManager().registerListeners(this, new LoginEventHandler());
         MCBansCommandSpecs mcbSpec = (new MCBansCommandSpecs(this, event));
     }
     
 	@Listener
     public void postinit(GamePostInitializationEvent event) {
-    	
+		bridge = this;
+		MCBansMod.bridge.config.getNode("").getString();
     }
-    public static void sendActionBar(Player p, String message){
-    	p.sendMessage(ChatTypes.ACTION_BAR, Texts.of(prefix+" "+message));
+	
+	public Logger getLogger(){
+		return pluginContainer.getLogger();
+	}
+	
+	
+	
+    public static MCBansMod getBridge() {
+		return bridge;
+	}
+	public ConfigurationNode getConfig() {
+		return config;
+	}
+	public PluginContainer getPluginContainer() {
+		return pluginContainer;
+	}
+	public static void sendActionBar(Player p, Text message){
+    	p.sendMessage(
+			ChatTypes.ACTION_BAR, 
+			Text.builder(MCBansMod.bridge.getConfig().getNode("server", "prefix").getString()).color(TextColors.AQUA).append(
+				Text.builder("> ").color(TextColors.WHITE).toText()
+			).append(message).toText());
     }
-    
+    public static void sendMessage(Player p, Text message){
+    	p.sendMessage(ChatTypes.CHAT, Text.builder(MCBansMod.bridge.getConfig().getNode("server", "prefix").getString()).color(TextColors.AQUA).append(
+				Text.builder("> ").color(TextColors.WHITE).toText()
+			).append(message).toText());
+    }
     
 }

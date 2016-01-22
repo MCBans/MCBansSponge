@@ -1,11 +1,10 @@
 package com.mcbans.firestar.commands.specs;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.text.Text.Literal;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.util.command.args.GenericArguments;
-import org.spongepowered.api.util.command.spec.CommandSpec;
-import org.spongepowered.api.util.command.spec.CommandSpec.Builder;
+import org.spongepowered.api.text.Text;
 
 import com.mcbans.firestar.MCBansMod;
 import com.mcbans.firestar.commands.BanCommands;
@@ -13,24 +12,24 @@ import com.mcbans.firestar.commands.TestCommand;
 
 public class MCBansCommandSpecs {
 	public MCBansCommandSpecs( MCBansMod plugin, GameInitializationEvent event ){
-		event.getGame().getCommandDispatcher().register(
+		Sponge.getGame().getCommandManager().register(
 			plugin, 
 			CommandSpec.builder()
 				.executor(new TestCommand())
-				.description(Texts.of("MCBans test command"))
+				.description(Text.of("MCBans test command"))
 				.arguments(
-					GenericArguments.onlyOne(GenericArguments.string(Texts.of("login")))
+					GenericArguments.onlyOne(GenericArguments.string(Text.of("login")))
 				).build(), 
 			"mcbans"
 		);
-		event.getGame().getCommandDispatcher().register(
+		Sponge.getGame().getCommandManager().register(
 			plugin, 
 			CommandSpec.builder()
 				.executor(new BanCommands())
-				.description(Texts.of("MCBans ban command"))
+				.description(Text.of("MCBans ban command"))
 				.arguments(
-					GenericArguments.onlyOne(GenericArguments.string(Texts.of("player"))),
-					GenericArguments.remainingJoinedStrings(Texts.of("reason"))
+					GenericArguments.onlyOne(GenericArguments.string(Text.of("player"))),
+					GenericArguments.remainingJoinedStrings(Text.of("reason"))
 				).build(), 
 			"ban"
 		);

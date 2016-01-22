@@ -1,6 +1,6 @@
 package com.mcbans.firestar.api.responses;
 
-public class BanResponse {
+public class BanResponse extends Response {
 	public String msg;
 	public String player;
 	public String word;

@@ -7,12 +7,13 @@ import java.net.URL;
 import java.util.Scanner;
 import java.util.UUID;
 
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.util.command.CommandException;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.args.CommandContext;
-import org.spongepowered.api.util.command.spec.CommandExecutor;
+import org.spongepowered.api.text.Text;
 
 import com.google.common.base.Optional;
 import com.google.gson.Gson;
@@ -26,7 +27,7 @@ public class TestCommand implements CommandExecutor  {
 		if(name!=null){
 			// Handle player login
 			try {
-				URL url = new URL("http://api.mcbans.com/v3/"+MCBansMod.apiKey+"/loginNew/"+name+"/127.0.0.1/json");
+				URL url = new URL("http://api.mcbans.com/v3/"+MCBansMod.bridge.getConfig().getNode("server", "apiKey").getString()+"/loginNew/"+name+"/127.0.0.1/json");
 				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 				connection.setRequestMethod("POST");
 				InputStream is = connection.getInputStream();
@@ -39,17 +40,12 @@ public class TestCommand implements CommandExecutor  {
 				System.out.println(loginData);
 				Gson gson = new Gson();
 				AuthenticationResponse ar = gson.fromJson(loginData, AuthenticationResponse.class);
-				MCBansMod.sendActionBar((Player) src, "Ban response: "+ar.getBanStatus());
+				((Player) src).sendMessage(Text.of("Ban response: "+ar.getBanStatus())); // come back later for styling
 			} catch (IOException e) {
 				//e.printStackTrace();
 			}
 		}else{
-			MCBansMod.sendActionBar( (Player) src, "[Error] UUID missing from player login!");
-			/*for(Player p: game.getServer().getOnlinePlayers()){
-				if(p.hasPermission("mcbans.login.error")){
-					MCBansMod.sendActionBar(src, "[Error] UUID missing from player login!");
-				}
-			}*/
+			((Player) src).sendMessage(Text.of("[Error] UUID missing from player login!"));
 		}
 		return null;
 	}

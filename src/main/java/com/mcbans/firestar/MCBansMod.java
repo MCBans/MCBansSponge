@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -32,7 +33,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-@Plugin(id = "MCB", name = "MCBans Banning Plugin", version="0.1")
+@Plugin(id = "MCBans", name = "MCBans", version="0.1")
 public class MCBansMod {
 
 	public static final String NAME = "MCBans";
@@ -78,10 +79,16 @@ public class MCBansMod {
 	            
 	            // Auth configs
 	            this.config.getNode("login", "block-zero-reputation").setValue(true);
-	            this.config.getNode("login", "block-minimum-reputation").setValue(4);
+	            
+	            this.config.getNode("login", "block-minimum-reputation").setValue(false);
+	            this.config.getNode("login", "minimum-reputation").setValue(4);
+	            
+	            this.config.getNode("login", "block-maximum-alts").setValue(false);
+	            this.config.getNode("login", "maximum-alts").setValue(5);
+	            this.config.getNode("join", "show-good").setValue(false);
 	            
 	            // Join configs
-	            this.config.getNode("join", "show", "bans").setValue(true);
+	            this.config.getNode("join", "show-ban-type").setValue(1);
 	            
 	            
 	            
@@ -124,8 +131,8 @@ public class MCBansMod {
 				Text.builder("> ").color(TextColors.WHITE).toText()
 			).append(message).toText());
     }
-    public static void sendMessage(Player p, Text message){
-    	p.sendMessage(ChatTypes.CHAT, Text.builder(MCBansMod.bridge.getConfig().getNode("server", "prefix").getString()).color(TextColors.AQUA).append(
+    public static void sendMessage(CommandSource p, Text message){
+    	p.sendMessage(Text.builder(MCBansMod.bridge.getConfig().getNode("server", "prefix").getString()).color(TextColors.AQUA).append(
 				Text.builder("> ").color(TextColors.WHITE).toText()
 			).append(message).toText());
     }

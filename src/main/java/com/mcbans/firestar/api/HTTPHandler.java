@@ -1,8 +1,10 @@
 package com.mcbans.firestar.api;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -10,9 +12,13 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Scanner;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.Map.Entry;
 
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import com.mcbans.firestar.MCBansMod;
 import com.mcbans.firestar.api.requests.Request;
 import com.mcbans.firestar.api.responses.BanResponse;
@@ -39,13 +45,17 @@ public class HTTPHandler {
 		
 		InputStream is = connection.getInputStream();
 		@SuppressWarnings("resource")
-		Scanner fromWeb = new Scanner(is);
 		StringBuilder sb = new StringBuilder();
-		while(fromWeb.hasNext()){
-			sb.append(fromWeb.next());
+		byte[] data = new byte[1024];
+		int readData = is.read(data);
+		while(readData!=-1){
+			sb.append(new String(ArrayUtils.subarray(data, 0, readData), "UTF-8"));
+			readData = is.read(data);
 		}
 		String returnData = sb.toString();
 		MCBansMod.bridge.getLogger().info(returnData);
-		return (new Gson()).fromJson(returnData, s);
+		JsonReader reader = new JsonReader(new StringReader(returnData));
+		reader.setLenient(true);
+		return (new Gson()).fromJson(reader, s);
 	}
 }

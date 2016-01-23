@@ -4,8 +4,8 @@ import com.mcbans.firestar.api.responses.ActionResponse;
 
 public class Unban implements Request {
 	public Unban(String player, String admin){
-		this.info.put("player", player);
-		this.info.put("admin", admin);
+		Request.info.put("player", player);
+		Request.info.put("admin", admin);
 	}
 	@Override
 	public String getExecution() {

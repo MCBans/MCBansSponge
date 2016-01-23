@@ -3,7 +3,6 @@ package com.mcbans.firestar.commands;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -17,7 +16,6 @@ import org.spongepowered.api.text.format.TextColors;
 
 import com.mcbans.firestar.MCBansMod;
 import com.mcbans.firestar.api.HTTPHandler;
-import com.mcbans.firestar.api.requests.LocalBan;
 import com.mcbans.firestar.api.requests.TempBan;
 import com.mcbans.firestar.api.responses.BanResponse;
 
@@ -26,7 +24,8 @@ public class TempCommand implements CommandExecutor {
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 		if(!src.hasPermission("mcbans.ban.temp")){
-			MCBansMod.getBridge().sendMessage(src, Text.builder("You do not have permission for this command!").color(TextColors.RED).toText());
+			MCBansMod.getBridge();
+			MCBansMod.sendMessage(src, Text.builder("You do not have permission for this command!").color(TextColors.RED).toText());
 			return CommandResult.empty();
 		}
 		String player = (String) args.getOne("player").get();
@@ -46,7 +45,7 @@ public class TempCommand implements CommandExecutor {
 		}
 		return CommandResult.success();
 	}
-	
+
 	public static class Threaded implements Runnable{
 		String player;
 		String admin;
@@ -68,16 +67,19 @@ public class TempCommand implements CommandExecutor {
 				TempBan b = new TempBan(player, "", "", number, unit, reason, admin);
 				BanResponse banResponse = HTTPHandler.execute(b);
 				if(banResponse.getError()!=null){
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Error: "+banResponse.getError()).color(TextColors.RED).toText()); //  come back for styling
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Error: "+banResponse.getError()).color(TextColors.RED).toText()); //  come back for styling
 				}else if(banResponse.getResult().equals("n") || banResponse.getResult().equals("a")){
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Error: "+banResponse.getMsg()).color(TextColors.RED).toText());
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Error: "+banResponse.getMsg()).color(TextColors.RED).toText());
 				}else{
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Success: "+banResponse.getMsg()).color(TextColors.GREEN).toText()); //  come back for styling
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Success: "+banResponse.getMsg()).color(TextColors.GREEN).toText()); //  come back for styling
 				}
 			} catch (InstantiationException | IllegalAccessException | IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 }

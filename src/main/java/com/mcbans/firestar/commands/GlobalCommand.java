@@ -16,7 +16,6 @@ import org.spongepowered.api.text.format.TextColors;
 import com.mcbans.firestar.MCBansMod;
 import com.mcbans.firestar.api.HTTPHandler;
 import com.mcbans.firestar.api.requests.GlobalBan;
-import com.mcbans.firestar.api.requests.LocalBan;
 import com.mcbans.firestar.api.responses.BanResponse;
 
 public class GlobalCommand implements CommandExecutor {
@@ -24,14 +23,16 @@ public class GlobalCommand implements CommandExecutor {
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 		if(!src.hasPermission("mcbans.ban.global")){
-			MCBansMod.getBridge().sendMessage(src, Text.builder("You do not have permission for this command!").color(TextColors.RED).toText());
+			MCBansMod.getBridge();
+			MCBansMod.sendMessage(src, Text.builder("You do not have permission for this command!").color(TextColors.RED).toText());
 			return CommandResult.empty();
 		}
 		String player = (String) args.getOne("player").get();
 		String admin = src.getName();
 		String reason = ((String) args.getOne("reason").get());
 		if(player.equals("") || reason.equals("")){
-			MCBansMod.getBridge().sendMessage(src, Text.builder("Not Formatted Properly").color(TextColors.RED).toText());
+			MCBansMod.getBridge();
+			MCBansMod.sendMessage(src, Text.builder("Not Formatted Properly").color(TextColors.RED).toText());
 			return CommandResult.empty();
 		}
 		Optional<Player> p = Sponge.getGame().getServer().getPlayer(player);
@@ -58,19 +59,23 @@ public class GlobalCommand implements CommandExecutor {
 				GlobalBan b = new GlobalBan(player, "", "", reason, admin);
 				BanResponse banResponse = HTTPHandler.execute(b);
 				if(banResponse.getError()!=null){
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Error: "+banResponse.getError()).color(TextColors.RED).toText()); //  come back for styling
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Error: "+banResponse.getError()).color(TextColors.RED).toText()); //  come back for styling
 				}else if(banResponse.getResult().equals("w")){
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Error: "+banResponse.getMsg()+" [ "+banResponse.getWord()+" ]").color(TextColors.DARK_RED).toText());
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Error: "+banResponse.getMsg()+" [ "+banResponse.getWord()+" ]").color(TextColors.DARK_RED).toText());
 				}else if(banResponse.getResult().equals("n") || banResponse.getResult().equals("a")){
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Error: "+banResponse.getMsg()).color(TextColors.RED).toText());
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Error: "+banResponse.getMsg()).color(TextColors.RED).toText());
 				}else{
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Success: "+banResponse.getMsg()).color(TextColors.GREEN).toText()); //  come back for styling
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Success: "+banResponse.getMsg()).color(TextColors.GREEN).toText()); //  come back for styling
 				}
 			} catch (InstantiationException | IllegalAccessException | IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 }

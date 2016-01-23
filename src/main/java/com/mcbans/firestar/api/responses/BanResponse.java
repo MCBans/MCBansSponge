@@ -7,7 +7,7 @@ public class BanResponse extends Response {
 	public String result;
 	public String error;
 	public BanResponse(){
-		
+
 	}
 	public String getMsg() {
 		return msg;

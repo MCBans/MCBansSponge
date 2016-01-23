@@ -67,8 +67,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 public @interface SerializedName {
 
-  /**
-   * @return the desired name of the field when it is serialized
-   */
-  String value();
+	/**
+	 * @return the desired name of the field when it is serialized
+	 */
+	String value();
 }

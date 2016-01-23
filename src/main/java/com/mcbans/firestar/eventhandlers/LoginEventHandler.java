@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.UUID;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -27,7 +26,7 @@ import com.mcbans.firestar.api.responses.AuthenticationResponse;
 
 public class LoginEventHandler {
 	public static Map<UUID, AuthenticationResponse> respones = new HashMap<UUID, AuthenticationResponse>();
-	
+
 	@Listener
 	public void playerAuth(ClientConnectionEvent.Auth event){
 		String name = event.getProfile().getName();
@@ -35,7 +34,7 @@ public class LoginEventHandler {
 		if(uuid!=null){
 			// Handle player login
 			try {
-				URL url = new URL("http://api.mcbans.com/v3/"+MCBansMod.bridge.getConfig().getNode("server", "apiKey").getString()+"/loginNew/"+uuid.toString()+"/"+event.getConnection().getAddress().getAddress().toString()+"/json");
+				URL url = new URL("http://api.mcbans.com/v3/"+MCBansMod.bridge.getConfig().getNode("server", "apiKey").getString()+"/loginNew/"+uuid.toString()+"/"+event.getConnection().getAddress().getAddress().toString().replace("/", "")+"/json");
 				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 				connection.setRequestMethod("POST");
 				InputStream is = connection.getInputStream();
@@ -83,25 +82,27 @@ public class LoginEventHandler {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("static-access")
 	@Listener
 	public void playerJoin(ClientConnectionEvent.Join event){
 		Player player = event.getTargetEntity();
 		UUID uuid = player.getProfile().getUniqueId();
-		if(this.respones.containsKey(uuid)){
-			AuthenticationResponse ar = this.respones.get(uuid);
-			this.respones.remove(uuid);
+		if(LoginEventHandler.respones.containsKey(uuid)){
+			AuthenticationResponse ar = LoginEventHandler.respones.get(uuid);
+			LoginEventHandler.respones.remove(uuid);
 			if(ar.is_mcbans_mod.equalsIgnoreCase("y")){
-				MCBansMod.getBridge().sendMessage(player, Text.builder("You are logged in as a MCBans staff member").color(TextColors.WHITE).toText());
+				MCBansMod.getBridge();
+				MCBansMod.sendMessage(player, Text.builder("You are logged in as a MCBans staff member").color(TextColors.WHITE).toText());
 				for(Player p: Sponge.getGame().getServer().getOnlinePlayers()){
 					if(p.hasPermission("mcbans.login.view.mcbans")){
-						MCBansMod.getBridge().sendMessage(p, Text.builder(player.getName()+" is a MCBans staff member").color(TextColors.GOLD).toText());
+						MCBansMod.getBridge();
+						MCBansMod.sendMessage(p, Text.builder(player.getName()+" is a MCBans staff member").color(TextColors.GOLD).toText());
 					}
 				}
 			}
 			if(!ar.connectMessage.equals("")){
-				MCBansMod.bridge.sendActionBar(player, Text.builder(ar.connectMessage).color(TextColors.WHITE).toText());
+				MCBansMod.sendActionBar(player, Text.builder(ar.connectMessage).color(TextColors.WHITE).toText());
 			}
 			if(ar.isPremium()){
 				if(ar.altList.size()>0){
@@ -111,16 +112,16 @@ public class LoginEventHandler {
 					}
 					for(Player p: Sponge.getGame().getServer().getOnlinePlayers()){
 						if(p.hasPermission("mcbans.login.view.alts")){
-							MCBansMod.bridge.sendMessage(
-								p,
-								Text.builder(player.getName())
-								.color(TextColors.LIGHT_PURPLE)
-								.append(
-										Text.builder(" Alternates ["+alts+"]")
-										.color(TextColors.WHITE)
-										.toText()
-								).toText()
-							);
+							MCBansMod.sendMessage(
+									p,
+									Text.builder(player.getName())
+									.color(TextColors.LIGHT_PURPLE)
+									.append(
+											Text.builder(" Alternates ["+alts+"]")
+											.color(TextColors.WHITE)
+											.toText()
+											).toText()
+									);
 						}
 					}
 				}
@@ -131,151 +132,151 @@ public class LoginEventHandler {
 					}
 					for(Player p: Sponge.getGame().getServer().getOnlinePlayers()){
 						if(p.hasPermission("mcbans.login.view.previous")){
-							MCBansMod.bridge.sendMessage(
-								p,
-								Text.builder(player.getName())
-								.color(TextColors.LIGHT_PURPLE)
-								.append(
-										Text.builder(" Previous ["+previous+"]")
-										.color(TextColors.WHITE)
-										.toText()
-								).toText()
-							);
+							MCBansMod.sendMessage(
+									p,
+									Text.builder(player.getName())
+									.color(TextColors.LIGHT_PURPLE)
+									.append(
+											Text.builder(" Previous ["+previous+"]")
+											.color(TextColors.WHITE)
+											.toText()
+											).toText()
+									);
 						}
 					}
 				}
 			}
 			if(ar.getBans().size()>0){
-				MCBansMod.bridge.sendActionBar(player, Text.builder("You have bans on your record!").color(TextColors.WHITE).toText());
+				MCBansMod.sendActionBar(player, Text.builder("You have bans on your record!").color(TextColors.WHITE).toText());
 				try {
-					MCBansMod.bridge.sendMessage(
-						player, 
-						Text
-						.builder("Click here to check your ban status")
-						.onClick(
-							TextActions
-							.openUrl(
-								new URL(
-									"http://mcbans.com/player/"+(uuid.toString().replace("-", ""))
-								)
-							)
-						)
-						.onHover(TextActions.showText(Text.of("Lookup player on MCBans.com")))
-						.color(TextColors.RED)
-						.style(TextStyles.UNDERLINE)
-						.toText()
-					);
+					MCBansMod.sendMessage(
+							player, 
+							Text
+							.builder("Click here to check your ban status")
+							.onClick(
+									TextActions
+									.openUrl(
+											new URL(
+													"http://mcbans.com/player/"+(uuid.toString().replace("-", ""))
+													)
+											)
+									)
+							.onHover(TextActions.showText(Text.of("Lookup player on MCBans.com")))
+							.color(TextColors.RED)
+							.style(TextStyles.UNDERLINE)
+							.toText()
+							);
 				} catch (MalformedURLException e) {
 					MCBansMod.bridge.getLogger().error("URL malformed in mcbans player link");
 				}
-				
+
 				switch(MCBansMod.bridge.getConfig().getNode("join", "show-ban-type").getInt()){
-					case 1:
-						for(Player p: Sponge.getGame().getServer().getOnlinePlayers()){
-							if(p.hasPermission("mcbans.login.view.bans")){
-								MCBansMod.bridge.sendMessage(
+				case 1:
+					for(Player p: Sponge.getGame().getServer().getOnlinePlayers()){
+						if(p.hasPermission("mcbans.login.view.bans")){
+							MCBansMod.sendMessage(
 									p,
 									Text.builder("")
 									.color(TextColors.WHITE)
 									.toText()
-								);
-								try {
-									MCBansMod.bridge.sendMessage(
+									);
+							try {
+								MCBansMod.sendMessage(
 										p,
 										Text.builder(player.getName())
 										.color(TextColors.LIGHT_PURPLE)
 										.append(
-											Text.builder(" has bans ["+ar.playerRep+"/10]")
-											.color(TextColors.WHITE)
-											.toText()
-										)
+												Text.builder(" has bans ["+ar.playerRep+"/10]")
+												.color(TextColors.WHITE)
+												.toText()
+												)
 										.append(
-											Text.builder(" [L]")
-											.onHover(TextActions.showText(Text.of("Lookup player on MCBans.com")))
-											.onClick(TextActions.openUrl(new URL("http://mcbans.com/player/"+(uuid.toString().replace("-", "")))))
-											.color(TextColors.GREEN)
-											.toText()
-										).toText()
-									);
-								} catch (MalformedURLException e1) {
-									e1.printStackTrace();
-								}
-								int x = 0;
-								for(HashMap<String, String> ban : ar.getBans()){
-									x++;
-									try {
-										MCBansMod.bridge.sendMessage(
+												Text.builder(" [L]")
+												.onHover(TextActions.showText(Text.of("Lookup player on MCBans.com")))
+												.onClick(TextActions.openUrl(new URL("http://mcbans.com/player/"+(uuid.toString().replace("-", "")))))
+												.color(TextColors.GREEN)
+												.toText()
+												).toText()
+										);
+							} catch (MalformedURLException e1) {
+								e1.printStackTrace();
+							}
+							int x = 0;
+							for(HashMap<String, String> ban : ar.getBans()){
+								x++;
+								try {
+									MCBansMod.sendMessage(
 											p,
 											Text.builder(x+": "+ban.get("type")+" - "+ban.get("server")+" \""+ban.get("reason")+"\"")
 											.color(TextColors.WHITE)
 											.append(
-												Text.builder(" [L]")
-												.onHover(TextActions.showText(Text.of("Lookup ban on MCBans.com")))
-												.onClick(TextActions.openUrl(new URL("http://mcbans.com/ban/"+ban.get("id"))))
-												.color(TextColors.GREEN)
-												.toText()
-											).toText()
-										);
-									} catch (MalformedURLException e) {
-										e.printStackTrace();
-									}
+													Text.builder(" [L]")
+													.onHover(TextActions.showText(Text.of("Lookup ban on MCBans.com")))
+													.onClick(TextActions.openUrl(new URL("http://mcbans.com/ban/"+ban.get("id"))))
+													.color(TextColors.GREEN)
+													.toText()
+													).toText()
+											);
+								} catch (MalformedURLException e) {
+									e.printStackTrace();
 								}
-								MCBansMod.bridge.sendMessage(
+							}
+							MCBansMod.sendMessage(
 									p,
 									Text.builder("")
 									.color(TextColors.WHITE)
 									.toText()
-								);
-							}
+									);
 						}
+					}
 					break;
-					case 2:
-						for(Player p: Sponge.getGame().getServer().getOnlinePlayers()){
-							if(p.hasPermission("mcbans.login.view.bans")){
-								MCBansMod.bridge.sendMessage(
+				case 2:
+					for(Player p: Sponge.getGame().getServer().getOnlinePlayers()){
+						if(p.hasPermission("mcbans.login.view.bans")){
+							MCBansMod.sendMessage(
 									p,
 									Text.builder(player.getName())
 									.color(TextColors.LIGHT_PURPLE)
 									.append(
-										Text.builder(" has bans ["+ar.playerRep+"/10]")
-										.color(TextColors.WHITE)
-										.toText()
-									)
+											Text.builder(" has bans ["+ar.playerRep+"/10]")
+											.color(TextColors.WHITE)
+											.toText()
+											)
 									.append(
-										Text.builder(" [C]")
-										.onHover(TextActions.showText(Text.of("Lookup the player")))
-										.onClick(TextActions.runCommand("/lup "+player.getName()))
-										.color(TextColors.GREEN)
-										.toText()
-									).toText()
-								);
-							}
+											Text.builder(" [C]")
+											.onHover(TextActions.showText(Text.of("Lookup the player")))
+											.onClick(TextActions.runCommand("/lup "+player.getName()))
+											.color(TextColors.GREEN)
+											.toText()
+											).toText()
+									);
 						}
+					}
 					break;
 				}
-				
+
 			}else{
 				if(MCBansMod.bridge.getConfig().getNode("join", "show-good").getBoolean()){
 					for(Player p: Sponge.getGame().getServer().getOnlinePlayers()){
 						if(p.hasPermission("mcbans.login.view.good")){
 							try {
-								MCBansMod.bridge.sendMessage(
-									p,
-									Text.builder(player.getName())
-									.color(TextColors.LIGHT_PURPLE)
-									.append(
-										Text.builder(" ["+ar.playerRep+"/10]")
-										.color(TextColors.WHITE)
-										.toText()
-									)
-									.append(
-										Text.builder(" [L]")
-										.onHover(TextActions.showText(Text.of("Lookup player on MCBans.com")))
-										.onClick(TextActions.openUrl(new URL("http://mcbans.com/player/"+(uuid.toString().replace("-", "")))))
-										.color(TextColors.GREEN)
-										.toText()
-									).toText()
-								);
+								MCBansMod.sendMessage(
+										p,
+										Text.builder(player.getName())
+										.color(TextColors.LIGHT_PURPLE)
+										.append(
+												Text.builder(" ["+ar.playerRep+"/10]")
+												.color(TextColors.WHITE)
+												.toText()
+												)
+										.append(
+												Text.builder(" [L]")
+												.onHover(TextActions.showText(Text.of("Lookup player on MCBans.com")))
+												.onClick(TextActions.openUrl(new URL("http://mcbans.com/player/"+(uuid.toString().replace("-", "")))))
+												.color(TextColors.GREEN)
+												.toText()
+												).toText()
+										);
 							} catch (MalformedURLException e1) {
 								e1.printStackTrace();
 							}

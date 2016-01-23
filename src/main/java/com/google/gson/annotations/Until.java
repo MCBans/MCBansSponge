@@ -58,9 +58,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface Until {
 
-  /**
-   * the value indicating a version number until this member
-   * or type should be ignored.
-   */
-  double value();
+	/**
+	 * the value indicating a version number until this member
+	 * or type should be ignored.
+	 */
+	double value();
 }

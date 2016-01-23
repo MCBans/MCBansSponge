@@ -25,12 +25,14 @@ public class LocalCommand implements CommandExecutor {
 		String player = (String) args.getOne("player").get();
 		String admin = src.getName();
 		if(!src.hasPermission("mcbans.ban.local")){
-			MCBansMod.getBridge().sendMessage(src, Text.builder("You do not have permission for this command!").color(TextColors.RED).toText());
+			MCBansMod.getBridge();
+			MCBansMod.sendMessage(src, Text.builder("You do not have permission for this command!").color(TextColors.RED).toText());
 			return CommandResult.empty();
 		}
 		String reason = ((String) args.getOne("reason").get());
 		if(player.equals("") || reason.equals("")){
-			MCBansMod.getBridge().sendMessage(src, Text.builder("Not Formatted Properly").color(TextColors.RED).toText());
+			MCBansMod.getBridge();
+			MCBansMod.sendMessage(src, Text.builder("Not Formatted Properly").color(TextColors.RED).toText());
 			return CommandResult.empty();
 		}
 		(new Thread(new LocalCommand.Threaded(player, admin, reason, src))).start();;
@@ -57,16 +59,19 @@ public class LocalCommand implements CommandExecutor {
 				LocalBan b = new LocalBan(player, "", "", reason, admin);
 				BanResponse banResponse = HTTPHandler.execute(b);
 				if(banResponse.getError()!=null){
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Error: "+banResponse.getError()).color(TextColors.RED).toText()); //  come back for styling
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Error: "+banResponse.getError()).color(TextColors.RED).toText()); //  come back for styling
 				}else if(banResponse.getResult().equals("n") || banResponse.getResult().equals("a")){
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Error: "+banResponse.getMsg()).color(TextColors.RED).toText());
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Error: "+banResponse.getMsg()).color(TextColors.RED).toText());
 				}else{
-					MCBansMod.getBridge().sendMessage(src, Text.builder("Success: "+banResponse.getMsg()).color(TextColors.GREEN).toText()); //  come back for styling
+					MCBansMod.getBridge();
+					MCBansMod.sendMessage(src, Text.builder("Success: "+banResponse.getMsg()).color(TextColors.GREEN).toText()); //  come back for styling
 				}
 			} catch (InstantiationException | IllegalAccessException | IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 }

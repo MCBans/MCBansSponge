@@ -19,7 +19,6 @@ import com.mcbans.firestar.api.requests.Request;
 public class HTTPHandler {
 	@SuppressWarnings("unchecked")
 	public static <T> T execute(Request r) throws InstantiationException, IllegalAccessException, IOException{
-
 		Class<T> s = r.getResponse();
 		URL url = new URL("http://api.mcbans.com/v3/"+MCBansMod.bridge.getConfig().getNode("server", "apiKey").getString()+"/");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();

@@ -1,0 +1,24 @@
+# Eclipse stuff
+.classpath
+.project
+.settings
+.settings/
+
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Mac filesystem dust
+.DS_Store
+
+# Gradle
+.gradle/
+
+# others
+desktop.ini
+bin
+bin/**
+build.xml
+/target
